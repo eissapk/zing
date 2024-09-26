@@ -11,7 +11,7 @@ function JoinRoom() {
       </section>
 
       <section>
-        <Button variant={"ghost"} className="h-12 text-base">
+        <Button variant={"ghost"} className="h-12 text-base px-8 box-border">
           Join
         </Button>
       </section>

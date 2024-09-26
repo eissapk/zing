@@ -9,7 +9,7 @@ export default function NewRoom() {
 
   return (
     <section>
-      <Button className="h-12 text-base" onClick={() => router.push("/room")}>
+      <Button className="h-12 text-base" onClick={() => router.push("/room/1234")}>
         <MessageSquareText className="me-4 h-5 w-5" />
         New room
       </Button>

@@ -1,4 +1,4 @@
-import styles from "@/components/ChatForm.module.css";
+import styles from "@/components/chat/Chat.module.css";
 export default function MyMsg({ msg = "" }) {
   return (
     <section className={`${styles.me} w-fit`}>

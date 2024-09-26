@@ -3,11 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
-export default function ChatForm({ className = "" }) {
+import { socket } from "@/lib/socket";
+export default function ChatForm({ className = "", roomName }: { className?: string; roomName: string }) {
   const [input, setInput] = useState("");
   const submitHandler = (e: any) => {
     e.preventDefault();
     console.log(input);
+    socket.emit("send-chat-message", roomName, input);
+    // appendMessage(`You: ${message}`);
+    setInput("");
   };
 
   return (

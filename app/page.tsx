@@ -1,6 +1,6 @@
-import Header from "@/components/Header";
-import JoinRoom from "@/components/JoinRoom";
-import NewRoom from "@/components/NewRoom";
+import Header from "@/components/home/Header";
+import JoinRoom from "@/components/home/JoinRoom";
+import NewRoom from "@/components/home/NewRoom";
 import type { Metadata } from "next";
 
 export default function Home() {
