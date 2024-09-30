@@ -3,14 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
-import { socket } from "@/lib/socket";
-export default function ChatForm({ className = "", roomName }: { className?: string; roomName: string }) {
+export default function ChatForm({
+  className = "",
+  roomName,
+  setMessages,
+  socket,
+}: {
+  socket: any;
+  className?: string;
+  roomName: string;
+  setMessages: any;
+}) {
   const [input, setInput] = useState("");
   const submitHandler = (e: any) => {
     e.preventDefault();
     console.log(input);
+    setMessages((prevState: any) => [...prevState, { type: "my", msg: input }]);
+
     socket.emit("send-chat-message", roomName, input);
-    // appendMessage(`You: ${message}`);
     setInput("");
   };
 
