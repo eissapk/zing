@@ -1,5 +1,8 @@
 import { rooms } from "..";
 import { getUserRooms } from ".";
+// socket.broadcast: sends to all connected users except the sender
+// Hint: socket.join() and socket.to() handles requests to specific unique id like room (so it's a built-in functionality in socket.io)
+// TODO: study join() and to()
 export const socket = socket => {
 	// runs when a new user connects
 	console.log("user connected", socket.id);
