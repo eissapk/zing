@@ -38,18 +38,17 @@ export default function Room({ params }: { params: { id: string } }) {
 
   socket.on("chat-message", (data) => {
     console.log("chat-message", { data });
-
-    // appendMessage(`${data.name}: ${data.message}`);
+    setMessages((prevState: any) => [...prevState, { type: "stranger", name: data.name, msg: data.message }]);
   });
 
   socket.on("user-connected", (name) => {
     console.log("user-connected", { name });
-    // appendMessage(`${name} connected`);
+    setMessages((prevState: any) => [...prevState, { type: "stranger", name, msg: "Connected" }]);
   });
 
   socket.on("user-disconnected", (name) => {
     console.log("user-disconnected", { name });
-    // appendMessage(`${name} disconnected`);
+    setMessages((prevState: any) => [...prevState, { type: "stranger", name, msg: "Disconnected" }]);
   });
 
   return (

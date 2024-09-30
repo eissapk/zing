@@ -10,10 +10,7 @@ export const randomKey = () => Math.random().toString(36).slice(2);
 export const fetcher = async ({ url, options }: { url: string; options: any }) => {
   let headers = {};
   if (options && options.headers) {
-    headers = {
-      ...options.headers,
-      "Access-Control-Allow-Origin": "*",
-    };
+    headers = { ...options.headers };
   }
   try {
     const response = await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + url, { ...options, headers });
