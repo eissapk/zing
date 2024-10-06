@@ -22,8 +22,7 @@ export const rooms = {};
 app.use(express.json({ limit: EXPRESS_LIMIT }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
-// app.use(cors(corsConfig));
-app.use(cors());
+app.use(cors(corsConfig));
 
 // routes
 // app.use(require("./routes").Router);
