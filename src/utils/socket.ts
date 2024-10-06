@@ -5,24 +5,28 @@ import { getUserRooms } from ".";
 // TODO: study join() and to()
 export const socket = socket => {
 	// runs when a new user connects
-	console.log("user connected", socket.id);
+	console.log("User:", socket.id, "Connected");
 
 	socket.on("new-user", (room, name) => {
 		socket.join(room);
-		console.log("user", room, name, socket.id);
+		console.log(`User: ${name}(${socket.id}) -- Joined room: ${room}`);
+
 		rooms[room].users[socket.id] = name;
 		socket.broadcast.to(room).emit("user-connected", name);
 	});
 
 	socket.on("send-chat-message", (room, message) => {
-		console.log(message);
-		socket.broadcast.to(room).emit("chat-message", { message, name: rooms[room].users[socket.id] });
+		const name = rooms[room].users[socket.id];
+		console.log(`User: ${name}(${socket.id}) -- Sent "${message}" -- To room: ${room}`);
+		socket.broadcast.to(room).emit("chat-message", { message, name });
 	});
 
 	socket.on("disconnect", () => {
 		getUserRooms(socket).forEach(room => {
 			// @ts-expect-error -- tandle it later
 			socket.broadcast.to(room).emit("user-disconnected", rooms[room].users[socket.id]);
+			// @ts-expect-error -- tandle it later
+			console.log(`User: ${rooms[room].users[socket.id]} -- Left room: ${room}`);
 			// @ts-expect-error -- tandle it later
 			delete rooms[room].users[socket.id];
 		});
