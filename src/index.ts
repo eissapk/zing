@@ -1,5 +1,5 @@
 import "dotenv/config";
-const { NODE_ENV, PORT, IO_PORT, EXPRESS_LIMIT, DOMAIN, DOMAIN_DEV }: any = process.env;
+const { NODE_ENV, PORT = 4000, IO_PORT = 4001, EXPRESS_LIMIT, DOMAIN, DOMAIN_DEV }: any = process.env;
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -22,7 +22,8 @@ export const rooms = {};
 app.use(express.json({ limit: EXPRESS_LIMIT }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
-app.use(cors(corsConfig));
+// app.use(cors(corsConfig));
+app.use(cors());
 
 // routes
 // app.use(require("./routes").Router);
