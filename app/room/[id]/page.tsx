@@ -25,6 +25,31 @@ export default function Room({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     init();
+
+    socket.on("room-created", (room) => {
+      console.log("room created", { room });
+    });
+
+    socket.on("chat-message", (data) => {
+      // console.log("chat-message", { data });
+      const obj = { type: "stranger", name: data.name, msg: data.message };
+      console.log(obj);
+      // setMessages((prevState: any) => [...prevState, obj]);
+    });
+
+    socket.on("user-connected", (name) => {
+      // console.log("user-connected", { name });
+      const obj = { type: "stranger", name, msg: "Connected" };
+      console.log(obj);
+      // setMessages((prevState: any) => [...prevState, obj]);
+    });
+
+    socket.on("user-disconnected", (name) => {
+      // console.log("user-disconnected", { name });
+      const obj = { type: "stranger", name, msg: "Disconnected" };
+      console.log(obj);
+      // setMessages((prevState: any) => [...prevState, ]);
+    });
   }, [id]);
 
   // if room doesn't exist
@@ -32,28 +57,9 @@ export default function Room({ params }: { params: { id: string } }) {
 
   // if (leftRoom) return <LeftRoom id={id} />;
 
-  socket.on("room-created", (room) => {
-    console.log("room created", { room });
-  });
-
-  socket.on("chat-message", (data) => {
-    console.log("chat-message", { data });
-    setMessages((prevState: any) => [...prevState, { type: "stranger", name: data.name, msg: data.message }]);
-  });
-
-  socket.on("user-connected", (name) => {
-    console.log("user-connected", { name });
-    setMessages((prevState: any) => [...prevState, { type: "stranger", name, msg: "Connected" }]);
-  });
-
-  socket.on("user-disconnected", (name) => {
-    console.log("user-disconnected", { name });
-    setMessages((prevState: any) => [...prevState, { type: "stranger", name, msg: "Disconnected" }]);
-  });
-
   return (
     <div className="flex gap-4 flex-col h-screen justify-between py-4">
-      <Nav peopleList={["eissa", "ahmed"]} />
+      <Nav roomId={id} />
       <div className="overflow-y-auto py-4 w-screen">
         <div className="max-w-max mx-auto">
           <article className="px-4 flex flex-col gap-10">

@@ -18,7 +18,9 @@ export default function ChatForm({
   const submitHandler = (e: any) => {
     e.preventDefault();
     console.log(input);
-    setMessages((prevState: any) => [...prevState, { type: "my", msg: input }]);
+    const obj = { type: "my", msg: input };
+    // console.log(obj);
+    setMessages((prevState: any) => [...prevState, obj]);
 
     socket.emit("send-chat-message", roomName, input);
     setInput("");

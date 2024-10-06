@@ -2,7 +2,7 @@ import People from "@/components/People";
 import { Copy } from "lucide-react";
 import ToolTip from "@/components/ToolTip";
 import { Button } from "../ui/button";
-function Nav({ peopleList = [] }: { peopleList: any[] }) {
+function Nav({ roomId }: { roomId: string }) {
   return (
     <nav className="max-w-max mx-auto w-full px-4">
       <ul className="flex items-center justify-end gap-x-4">
@@ -14,7 +14,7 @@ function Nav({ peopleList = [] }: { peopleList: any[] }) {
           </ToolTip>
         </li>
         <li>
-          <People list={peopleList} />
+          <People roomId={roomId} />
         </li>
       </ul>
     </nav>

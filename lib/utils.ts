@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const randomKey = () => Math.random().toString(36).slice(2);
 
-export const fetcher = async ({ url, options }: { url: string; options: any }) => {
+export const fetcher = async ({ url, options = {} }: { url: string; options?: any }) => {
   let headers = {};
   if (options && options.headers) {
     headers = { ...options.headers };
