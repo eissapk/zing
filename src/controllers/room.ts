@@ -19,6 +19,7 @@ export const createRoom = (req, res) => {
 	rooms[req.body.room] = { users: {} };
 	// send msg to new room created
 	io.emit("room-created", room);
-	res.redirect("/room/" + room);
+	res.status(200).json({success: true, message: `Room(${room}) created!`})
+	// res.redirect("/room/" + room);
 	console.log(`Room(${room}) created!`);
 };
