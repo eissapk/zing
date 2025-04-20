@@ -4,6 +4,7 @@ import ChatForm from "@/components/chat/Form";
 import MyMsg from "@/components/chat/MyMsg";
 import Nav from "@/components/chat/Nav";
 import StrangerMsg from "@/components/chat/StrangerMsg";
+import { useToast } from "@/hooks/use-toast";
 // import { redirect } from "next/navigation";
 import { fetcher } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +15,7 @@ type MSG = { type: string; name?: string; msg: string };
 export default function Room({ params }: { params: { id: string } }) {
 	const { id } = params;
 	const [messages, setMessages] = useState<MSG[]>([]);
+	const { toast } = useToast();
 	const div = useRef(null);
 	const init = async () => {
 		const res = await createRoom(id);
@@ -30,7 +32,7 @@ export default function Room({ params }: { params: { id: string } }) {
 			// @ts-expect-error -- todo
 			div.current.scrollTop = div.current.scrollHeight;
 		}
-	},[messages]);
+	}, [messages]);
 
 	useEffect(() => {
 		init();
@@ -43,7 +45,7 @@ export default function Room({ params }: { params: { id: string } }) {
 			// console.log("chat-message", { data });
 			const obj = { type: "stranger", name: data.name, msg: data.message };
 			console.log(obj);
-			setMessages((prevState: any) => [...prevState, obj]);	
+			setMessages((prevState: any) => [...prevState, obj]);
 		});
 
 		socket.on("user-connected", name => {
@@ -51,6 +53,11 @@ export default function Room({ params }: { params: { id: string } }) {
 			const obj = { type: "stranger", name, msg: "Connected" };
 			console.log(obj);
 			setMessages((prevState: any) => [...prevState, obj]);
+
+			toast({
+				title: "Joined room",
+				description: `${obj.name}`,
+			});
 		});
 
 		socket.on("user-disconnected", name => {
@@ -58,6 +65,11 @@ export default function Room({ params }: { params: { id: string } }) {
 			const obj = { type: "stranger", name, msg: "Disconnected" };
 			console.log(obj);
 			setMessages((prevState: any) => [...prevState]);
+
+			toast({
+				title: "Left room",
+				description: `${obj.name}`,
+			});
 		});
 	}, [id]);
 

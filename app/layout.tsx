@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/toaster";
 import React from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
@@ -28,6 +29,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<main className="flex flex-col justify-center items-center h-screen">{children}</main>
+				<Toaster />
 			</body>
 		</html>
 	);
