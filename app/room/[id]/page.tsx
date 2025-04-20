@@ -6,7 +6,7 @@ import Nav from "@/components/chat/Nav";
 import StrangerMsg from "@/components/chat/StrangerMsg";
 // import { redirect } from "next/navigation";
 import { fetcher } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL);
 type MSG = { type: string; name?: string; msg: string };
@@ -14,6 +14,7 @@ type MSG = { type: string; name?: string; msg: string };
 export default function Room({ params }: { params: { id: string } }) {
 	const { id } = params;
 	const [messages, setMessages] = useState<MSG[]>([]);
+	const div = useRef(null);
 	const init = async () => {
 		const res = await createRoom(id);
 		console.log({ id, res });
@@ -22,6 +23,14 @@ export default function Room({ params }: { params: { id: string } }) {
 		setMessages([...messages, { type: "my", msg: "You joined" }]);
 		socket.emit("new-user", id, name);
 	};
+
+	useEffect(() => {
+		// scroll to bottom on each message
+		if (div.current) {
+			// @ts-expect-error -- todo
+			div.current.scrollTop = div.current.scrollHeight;
+		}
+	},[messages]);
 
 	useEffect(() => {
 		init();
@@ -34,7 +43,7 @@ export default function Room({ params }: { params: { id: string } }) {
 			// console.log("chat-message", { data });
 			const obj = { type: "stranger", name: data.name, msg: data.message };
 			console.log(obj);
-			setMessages((prevState: any) => [...prevState, obj]);
+			setMessages((prevState: any) => [...prevState, obj]);	
 		});
 
 		socket.on("user-connected", name => {
@@ -60,7 +69,7 @@ export default function Room({ params }: { params: { id: string } }) {
 	return (
 		<div className="flex gap-4 flex-col h-screen justify-between py-4">
 			<Nav roomId={id} />
-			<div className="overflow-y-auto py-4 w-screen">
+			<div ref={div} className="overflow-y-auto py-4 w-screen">
 				<div className="max-w-max mx-auto">
 					<article className="px-4 flex flex-col gap-10">
 						{messages.map((msg, index) => {
