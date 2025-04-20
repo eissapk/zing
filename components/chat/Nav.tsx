@@ -5,7 +5,7 @@ import ToolTip from "@/components/ToolTip";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-function copyToClipboard(text) {
+function copyToClipboard(text:string) {
 	// Use the Clipboard API if available
 	if (navigator.clipboard && window.isSecureContext) {
 		navigator.clipboard
