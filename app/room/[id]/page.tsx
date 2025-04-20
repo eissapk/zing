@@ -8,7 +8,7 @@ import StrangerMsg from "@/components/chat/StrangerMsg";
 import { fetcher } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-const socket = io(process.env.NEXT_PUBLIC_BACKEND_IO_URL);
+const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL);
 type MSG = { type: string; name?: string; msg: string };
 
 export default function Room({ params }: { params: { id: string } }) {
