@@ -31,6 +31,9 @@ app.use(morgan("tiny"));
 app.use(cors(corsConfig));
 
 // Routes
+app.get("/", (_req, res) => {
+	res.send("server works");
+});
 app.use("/api", room);
 
 // Socket.io events
