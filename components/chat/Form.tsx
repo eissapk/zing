@@ -3,8 +3,9 @@
 import EmojiPicker from "@/components/chat/EmojiPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { playSendSound } from "@/lib/sounds";
 import type { Message } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, msgId } from "@/lib/utils";
 import { SendHorizontal, Smile } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
@@ -48,9 +49,10 @@ export default function ChatForm({
 		e.preventDefault();
 		if (!input.trim()) return;
 
-		const obj: Message = { type: "my", msg: input };
+		const obj: Message = { type: "my", msg: input, time: Date.now(), id: msgId() };
 		setMessages((prev) => [...prev, obj]);
 		socket.emit("send-chat-message", roomName, input);
+		playSendSound();
 		setInput("");
 		setEmojiOpen(false);
 	};
@@ -64,7 +66,7 @@ export default function ChatForm({
 				anchorRef={emojiButtonRef}
 			/>
 
-			<div className="flex items-center gap-2 p-2 rounded-2xl glass-strong">
+			<div className="flex items-center gap-1.5 p-1.5 rounded-full bg-muted/80 dark:bg-secondary/80 border border-border/50">
 				<Button
 					ref={emojiButtonRef}
 					type="button"
@@ -72,18 +74,18 @@ export default function ChatForm({
 					variant="ghost"
 					onClick={() => setEmojiOpen((prev) => !prev)}
 					className={cn(
-						"size-10 rounded-xl shrink-0 hover:bg-foreground/5",
-						emojiOpen && "bg-muted text-violet-500 dark:text-violet-400"
+						"size-10 rounded-full shrink-0 hover:bg-foreground/5",
+						emojiOpen && "bg-background text-sky-600 dark:text-sky-400"
 					)}
 					aria-label="Toggle emoji picker">
-					<Smile className="size-4 pointer-events-none" />
+					<Smile className="size-5 pointer-events-none" />
 				</Button>
 
 				<Input
 					ref={inputRef}
 					type="text"
-					placeholder="Type a message..."
-					className="h-11 flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm"
+					placeholder="Message"
+					className="h-10 flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm rounded-full"
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
 				/>
@@ -92,8 +94,13 @@ export default function ChatForm({
 					type="submit"
 					size="icon"
 					disabled={!input.trim()}
-					className="size-10 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 border-0 shrink-0 disabled:opacity-30">
-					<SendHorizontal className="size-4 pointer-events-none" />
+					className={cn(
+						"size-10 rounded-full shrink-0 transition-all duration-200",
+						input.trim()
+							? "bg-sky-500 hover:bg-sky-600 text-white border-0 scale-100"
+							: "bg-transparent text-muted-foreground border-0 scale-95 opacity-50"
+					)}>
+					<SendHorizontal className="size-5 pointer-events-none" />
 				</Button>
 			</div>
 		</form>

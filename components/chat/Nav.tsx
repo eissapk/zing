@@ -1,6 +1,7 @@
 "use client";
 
 import People from "@/components/People";
+import WallpaperPicker from "@/components/chat/WallpaperPicker";
 import ThemeToggle from "@/components/ThemeToggle";
 import ToolTip from "@/components/ToolTip";
 import { Button } from "@/components/ui/button";
@@ -41,28 +42,33 @@ function Nav({ roomId }: { roomId: string }) {
 	};
 
 	return (
-		<header className="shrink-0 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-			<nav className="max-w-chat mx-auto w-full px-4 py-3 flex items-center justify-between">
+		<header className="shrink-0 border-b border-border/60 bg-background z-10">
+			<nav className="max-w-chat mx-auto w-full px-3 py-2.5 flex items-center justify-between">
 				<div className="flex items-center gap-3 min-w-0">
-					<Link href="/" className="size-9 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shrink-0 hover:opacity-90 transition-opacity">
+					<Link
+						href="/"
+						className="size-9 rounded-full bg-sky-500 flex items-center justify-center shrink-0 hover:bg-sky-600 transition-colors">
 						<MessageCircle className="size-4 text-white" />
 					</Link>
 					<div className="min-w-0">
-						<p className="text-xs text-muted-foreground">Room</p>
-						<p className="text-sm font-mono font-medium truncate flex items-center gap-1">
-							<Hash className="size-3 text-muted-foreground shrink-0" />
+						<p className="text-sm font-semibold truncate">Room chat</p>
+						<p className="text-xs font-mono text-muted-foreground truncate flex items-center gap-1">
+							<Hash className="size-3 shrink-0" />
 							{roomId}
 						</p>
 					</div>
 				</div>
 
-				<ul className="flex items-center gap-1.5">
+				<ul className="flex items-center gap-0.5">
+					<li>
+						<WallpaperPicker />
+					</li>
 					<li>
 						<ThemeToggle />
 					</li>
 					<li>
 						<ToolTip title="Copy invite link">
-							<Button size="icon" variant="ghost" className="size-9 rounded-xl hover:bg-foreground/5" onClick={copyUrl}>
+							<Button size="icon" variant="ghost" className="size-9 rounded-full hover:bg-muted" onClick={copyUrl}>
 								<Copy className="size-4" />
 							</Button>
 						</ToolTip>

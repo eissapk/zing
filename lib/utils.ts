@@ -22,23 +22,47 @@ export const fetcher = async ({ url, options = {} }: { url: string; options?: Re
 	}
 };
 
-const AVATAR_COLORS = [
-	"from-violet-500 to-purple-600",
-	"from-cyan-500 to-blue-600",
-	"from-fuchsia-500 to-pink-600",
-	"from-emerald-500 to-teal-600",
-	"from-amber-500 to-orange-600",
-	"from-rose-500 to-red-600",
-	"from-indigo-500 to-violet-600",
-	"from-sky-500 to-cyan-600",
-];
-
-export function avatarColor(name: string): string {
+function nameHash(name: string): number {
 	let hash = 0;
 	for (let i = 0; i < name.length; i++) {
 		hash = name.charCodeAt(i) + ((hash << 5) - hash);
 	}
-	return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+	return Math.abs(hash);
+}
+
+export function avatarStyle(name: string): { backgroundColor: string; color: string } {
+	const hue = nameHash(name) % 360;
+	const backgroundColor = `hsl(${hue} 52% 40%)`;
+	return { backgroundColor, color: "#ffffff" };
+}
+
+export function msgId() {
+	return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+export function formatMessageTime(timestamp: number): string {
+	return new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+export function formatDateLabel(timestamp: number): string {
+	const date = new Date(timestamp);
+	const today = new Date();
+	const yesterday = new Date();
+	yesterday.setDate(today.getDate() - 1);
+
+	const isSameDay = (a: Date, b: Date) =>
+		a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+	if (isSameDay(date, today)) return "Today";
+	if (isSameDay(date, yesterday)) return "Yesterday";
+
+	const weekAgo = new Date();
+	weekAgo.setDate(today.getDate() - 6);
+	if (date >= weekAgo) {
+		return date.toLocaleDateString([], { weekday: "long" });
+	}
+
+	return date.toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" });
 }
 
 export function getInitials(name: string): string {

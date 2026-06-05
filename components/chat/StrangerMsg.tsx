@@ -1,15 +1,40 @@
 import Avatar from "@/components/chat/Avatar";
+import { formatMessageTime, cn } from "@/lib/utils";
 
-export default function StrangerMsg({ msg = "", name = "Anonymous", time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }: { msg: string; name?: string; time?: string }) {
+export default function StrangerMsg({
+	msg,
+	name = "Anonymous",
+	time,
+	showAvatar = true,
+	showName = true,
+	isGrouped = false,
+}: {
+	msg: string;
+	name?: string;
+	time: number;
+	showAvatar?: boolean;
+	showName?: boolean;
+	isGrouped?: boolean;
+}) {
 	return (
-		<div className="flex gap-3 items-end animate-slide-up">
-			<Avatar name={name} size="sm" />
-			<div className="flex flex-col gap-1 max-w-[75%]">
-				<div className="flex items-center gap-2 px-1">
-					<span className="text-xs font-medium text-foreground/80">{name}</span>
-					<span className="text-[10px] text-muted-foreground">{time}</span>
+		<div className={cn("flex gap-2 items-end message-in", isGrouped ? "mt-0.5" : "mt-2")}>
+			{showAvatar ? (
+				<Avatar name={name} size="sm" />
+			) : (
+				<div className="size-8 shrink-0" />
+			)}
+			<div className="flex flex-col max-w-[80%] min-w-[4rem]">
+				{showName && (
+					<span className="text-xs font-semibold text-sky-600 dark:text-sky-400 mb-0.5 ml-1">{name}</span>
+				)}
+				<div className="relative">
+					<div className="bubble-in px-3 py-1.5 pb-5 rounded-2xl rounded-bl-sm text-sm leading-relaxed break-words">
+						<span className="whitespace-pre-wrap">{msg}</span>
+						<span className="absolute bottom-1 right-2.5 text-[10px] leading-none text-muted-foreground/70 tabular-nums">
+							{formatMessageTime(time)}
+						</span>
+					</div>
 				</div>
-				<div className="px-4 py-2.5 rounded-2xl rounded-bl-md glass text-sm leading-relaxed">{msg}</div>
 			</div>
 		</div>
 	);

@@ -1,30 +1,39 @@
 "use client";
 
 import ChatForm from "@/components/chat/Form";
-import MyMsg from "@/components/chat/MyMsg";
+import MessageList from "@/components/chat/MessageList";
 import Nav from "@/components/chat/Nav";
-import StrangerMsg from "@/components/chat/StrangerMsg";
-import SystemMsg from "@/components/chat/SystemMsg";
 import UsernameDialog from "@/components/chat/UsernameDialog";
+import { WallpaperProvider, useWallpaper } from "@/components/WallpaperProvider";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { playJoinSound, playLeaveSound, playReceiveSound } from "@/lib/sounds";
 import type { Message } from "@/lib/types";
-import { fetcher } from "@/lib/utils";
+import { fetcher, msgId } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 
 const socket: Socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!);
 
 export default function Room({ params }: { params: { id: string } }) {
-	const { id } = params;
+	return (
+		<WallpaperProvider>
+			<RoomChat id={params.id} />
+		</WallpaperProvider>
+	);
+}
+
+function RoomChat({ id }: { id: string }) {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [showNameDialog, setShowNameDialog] = useState(true);
 	const [joined, setJoined] = useState(false);
 	const { toast } = useToast();
+	const { wallpaper } = useWallpaper();
 	const scrollRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (scrollRef.current) {
-			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+			scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
 		}
 	}, [messages]);
 
@@ -33,7 +42,7 @@ export default function Room({ params }: { params: { id: string } }) {
 			await createRoom(id);
 			setShowNameDialog(false);
 			setJoined(true);
-			setMessages([{ type: "system", msg: "You joined the room", variant: "info" }]);
+			setMessages([{ type: "system", msg: "You joined the room", variant: "info", time: Date.now(), id: msgId() }]);
 			socket.emit("new-user", id, name);
 		},
 		[id]
@@ -43,16 +52,28 @@ export default function Room({ params }: { params: { id: string } }) {
 		if (!joined) return;
 
 		const onChatMessage = (data: { name: string; message: string }) => {
-			setMessages((prev) => [...prev, { type: "stranger", name: data.name, msg: data.message }]);
+			setMessages((prev) => [
+				...prev,
+				{ type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() },
+			]);
+			playReceiveSound();
 		};
 
 		const onUserConnected = (name: string) => {
-			setMessages((prev) => [...prev, { type: "system", msg: `${name} joined`, variant: "join" }]);
+			setMessages((prev) => [
+				...prev,
+				{ type: "system", msg: `${name} joined`, variant: "join", time: Date.now(), id: msgId() },
+			]);
+			playJoinSound();
 			toast({ title: "Someone joined", description: name });
 		};
 
 		const onUserDisconnected = (name: string) => {
-			setMessages((prev) => [...prev, { type: "system", msg: `${name} left`, variant: "leave" }]);
+			setMessages((prev) => [
+				...prev,
+				{ type: "system", msg: `${name} left`, variant: "leave", time: Date.now(), id: msgId() },
+			]);
+			playLeaveSound();
 			toast({ title: "Someone left", description: name });
 		};
 
@@ -68,28 +89,22 @@ export default function Room({ params }: { params: { id: string } }) {
 	}, [joined, toast]);
 
 	return (
-		<div className="flex flex-col h-screen mesh-bg">
+		<div className="flex flex-col h-screen bg-background">
 			<UsernameDialog open={showNameDialog} onSubmit={joinRoom} />
 			<Nav roomId={id} />
 
-			<div ref={scrollRef} className="flex-1 overflow-y-auto">
-				<div className="max-w-chat mx-auto px-4 py-6">
+			<div ref={scrollRef} className={cn("flex-1 overflow-y-auto chat-area", `chat-wp-${wallpaper}`)}>
+				<div className="max-w-chat mx-auto px-3 py-4">
 					{messages.length === 0 && joined && (
 						<div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center">
 							<p className="text-muted-foreground text-sm">No messages yet. Say hello!</p>
 						</div>
 					)}
-					<div className="flex flex-col gap-4">
-						{messages.map((msg, index) => {
-							if (msg.type === "my") return <MyMsg key={index} msg={msg.msg} />;
-							if (msg.type === "stranger") return <StrangerMsg key={index} msg={msg.msg} name={msg.name} />;
-							if (msg.type === "system") return <SystemMsg key={index} msg={msg.msg} variant={msg.variant} />;
-						})}
-					</div>
+					<MessageList messages={messages} />
 				</div>
 			</div>
 
-			<div className="shrink-0 border-t border-border/60 bg-background/80 backdrop-blur-xl px-4 py-3">
+			<div className="shrink-0 border-t border-border/60 bg-background px-3 py-2">
 				<ChatForm className="max-w-chat mx-auto" roomName={id} setMessages={setMessages} socket={socket} />
 			</div>
 		</div>
