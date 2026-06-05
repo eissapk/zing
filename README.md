@@ -10,4 +10,8 @@ npm run dev
 ```
 
 ### todolist
- seen
+notification using push notification browser api
+Writing..
+Seen
+Attachments (image, audio, gif, etc)
+Load chat for new users (at least the last 10 messages)
