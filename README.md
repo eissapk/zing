@@ -9,3 +9,6 @@ npm i
 npm run dev
 ```
 
+### todolist
+ message time/username
+ seen

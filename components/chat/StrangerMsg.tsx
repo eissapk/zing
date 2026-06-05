@@ -1,11 +1,16 @@
-export default function StrangerMsg({ msg = "", name = "Anonymous", time = new Date().toLocaleTimeString() }) {
+import Avatar from "@/components/chat/Avatar";
+
+export default function StrangerMsg({ msg = "", name = "Anonymous", time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }: { msg: string; name?: string; time?: string }) {
 	return (
-		<section className="w-fit flex gap-1 flex-col items-start">
-			<div className="flex gap-2 items-start justify-center">
-				<span className="font-bold truncate max-w-48">{name}</span>
-				<span className="text-sm text-zinc-500 mt-[2px]">{time}</span>
+		<div className="flex gap-3 items-end animate-slide-up">
+			<Avatar name={name} size="sm" />
+			<div className="flex flex-col gap-1 max-w-[75%]">
+				<div className="flex items-center gap-2 px-1">
+					<span className="text-xs font-medium text-foreground/80">{name}</span>
+					<span className="text-[10px] text-muted-foreground">{time}</span>
+				</div>
+				<div className="px-4 py-2.5 rounded-2xl rounded-bl-md glass text-sm leading-relaxed">{msg}</div>
 			</div>
-			<div>{msg}</div>
-		</section>
+		</div>
 	);
 }

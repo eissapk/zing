@@ -1,43 +1,29 @@
 "use client";
-import People from "@/components/People";
-import { Copy } from "lucide-react";
-import ToolTip from "@/components/ToolTip";
-import { Button } from "../ui/button";
-import { useToast } from "@/hooks/use-toast";
 
-function copyToClipboard(text:string) {
-	// Use the Clipboard API if available
+import People from "@/components/People";
+import ThemeToggle from "@/components/ThemeToggle";
+import ToolTip from "@/components/ToolTip";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Copy, Hash, MessageCircle } from "lucide-react";
+import Link from "next/link";
+
+function copyToClipboard(text: string) {
 	if (navigator.clipboard && window.isSecureContext) {
-		navigator.clipboard
-			.writeText(text)
-			.then(() => {
-				console.log("Text copied to clipboard");
-			})
-			.catch(error => {
-				console.error("Failed to copy text: ", error);
-			});
+		navigator.clipboard.writeText(text).catch(console.error);
 	} else {
-		// Fallback for older browsers or non-secure contexts
 		const textArea = document.createElement("textarea");
 		textArea.value = text;
-
-		// Make the textarea out of viewport
 		textArea.style.position = "fixed";
 		textArea.style.left = "-999999px";
-		textArea.style.top = "-999999px";
 		document.body.appendChild(textArea);
-
 		textArea.focus();
 		textArea.select();
-
 		try {
-			const successful = document.execCommand("copy");
-			const msg = successful ? "successful" : "unsuccessful";
-			console.log("Fallback: Copying text was " + msg);
+			document.execCommand("copy");
 		} catch (err) {
-			console.error("Fallback: Unable to copy", err);
+			console.error("Unable to copy", err);
 		}
-
 		document.body.removeChild(textArea);
 	}
 }
@@ -48,27 +34,45 @@ function Nav({ roomId }: { roomId: string }) {
 	const copyUrl = () => {
 		const url = window.location.href;
 		copyToClipboard(url);
-		console.log("copied", url);
 		toast({
-			title: "Copied to clipboard!",
-			description: url,
+			title: "Link copied!",
+			description: "Share it with others to invite them.",
 		});
 	};
+
 	return (
-		<nav className="max-w-max mx-auto w-full px-4">
-			<ul className="flex items-center justify-end gap-x-4">
-				<li>
-					<ToolTip title="Copy room link">
-						<Button size={"icon"} variant={"outline"} className="rounded-full" onClick={copyUrl}>
-							<Copy className="w-4 h-4" />
-						</Button>
-					</ToolTip>
-				</li>
-				<li>
-					<People roomId={roomId} />
-				</li>
-			</ul>
-		</nav>
+		<header className="shrink-0 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+			<nav className="max-w-chat mx-auto w-full px-4 py-3 flex items-center justify-between">
+				<div className="flex items-center gap-3 min-w-0">
+					<Link href="/" className="size-9 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shrink-0 hover:opacity-90 transition-opacity">
+						<MessageCircle className="size-4 text-white" />
+					</Link>
+					<div className="min-w-0">
+						<p className="text-xs text-muted-foreground">Room</p>
+						<p className="text-sm font-mono font-medium truncate flex items-center gap-1">
+							<Hash className="size-3 text-muted-foreground shrink-0" />
+							{roomId}
+						</p>
+					</div>
+				</div>
+
+				<ul className="flex items-center gap-1.5">
+					<li>
+						<ThemeToggle />
+					</li>
+					<li>
+						<ToolTip title="Copy invite link">
+							<Button size="icon" variant="ghost" className="size-9 rounded-xl hover:bg-foreground/5" onClick={copyUrl}>
+								<Copy className="size-4" />
+							</Button>
+						</ToolTip>
+					</li>
+					<li>
+						<People roomId={roomId} />
+					</li>
+				</ul>
+			</nav>
+		</header>
 	);
 }
 

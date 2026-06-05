@@ -1,17 +1,27 @@
+import ThemeToggle from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { Home, MessageCircle } from "lucide-react";
+import Link from "next/link";
+
 export default function NotFound() {
 	return (
-		<main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
-			<div className="text-center">
-				<p className="text-base font-semibold text-gray-600">404</p>
-				<h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">Page not found</h1>
-				<p className="mt-6 text-base leading-7 text-gray-600">Sorry, we couldn’t find the page you’re looking for.</p>
-				<div className="mt-10 flex items-center justify-center gap-x-6">
-					<a
-						href="/"
-						className="rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
-						Go back home
-					</a>
+		<main className="relative min-h-screen flex flex-col items-center justify-center px-6 mesh-bg">
+			<div className="absolute top-4 right-4">
+				<ThemeToggle />
+			</div>
+			<div className="text-center animate-slide-up">
+				<div className="inline-flex items-center justify-center size-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-cyan-500/20 mb-6">
+					<MessageCircle className="size-8 text-muted-foreground" />
 				</div>
+				<p className="text-sm font-mono text-violet-400 mb-2">404</p>
+				<h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3">Page not found</h1>
+				<p className="text-muted-foreground max-w-sm mx-auto">This page doesn&apos;t exist or may have been removed.</p>
+				<Button asChild className="mt-8 bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 border-0">
+					<Link href="/">
+						<Home className="size-4 mr-2" />
+						Back to home
+					</Link>
+				</Button>
 			</div>
 		</main>
 	);
