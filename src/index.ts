@@ -31,10 +31,10 @@ app.use(morgan("tiny"));
 app.use(cors(corsConfig));
 
 // Routes
-app.get("/", (_req, res) => {
-	res.send("server works");
-});
 app.use("/api", room);
+// app.get("/", (_req, res) => {
+// 	res.send("server works");
+// });
 
 // Socket.io events
 io.on("connection", socket);
