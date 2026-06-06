@@ -25,7 +25,7 @@ export default function Room({ params }: { params: { id: string } }) {
 
 function RoomChat({ id }: { id: string }) {
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [typingUsers, setTypingUsers] = useState<string[]>([]);
+	const [typingUsers, setTypingUsers] = useState<{ name: string; id: number }[]>([]);
 	const [usersTypyingHint, setUsersTypyingHint] = useState<string>("");
 	const [showNameDialog, setShowNameDialog] = useState(true);
 	const [joined, setJoined] = useState(false);
@@ -57,19 +57,15 @@ function RoomChat({ id }: { id: string }) {
 			setMessages(prev => [...prev, { type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() }]);
 			playReceiveSound();
 		};
-		const onChatTyping = (name: string) => {
-			if (typingUsers.includes(name)) return;
-			setTypingUsers(prev => [...prev, name]);
+		const onChatTyping = (data: { name: string; id: number }) => {
+			setTypingUsers(prev => {
+				const user = prev.find(user => user.id === data.id);
+				if (!user) return [...prev, { ...data }];
+				return prev;
+			});
 		};
-		const onChatStoppedTyping = (name: string) => {
-			// remove first match of name in case of having same name multiple times
-			if (typingUsers.length) {
-				setTypingUsers(prev => {
-					return prev.filter(user => user !== name);
-				});
-			} else {
-				setTypingUsers([]);
-			}
+		const onChatStoppedTyping = (data: { name: string; id: number }) => {
+			setTypingUsers(prev => prev.filter(user => user.id !== data.id));
 		};
 
 		const onUserConnected = (name: string) => {
@@ -101,11 +97,10 @@ function RoomChat({ id }: { id: string }) {
 
 	useEffect(() => {
 		if (typingUsers.length) {
-			setUsersTypyingHint(typingUsers.join(", ") + (typingUsers.length > 1 ? " are" : " is") + " typing...");
+			setUsersTypyingHint(typingUsers.map(user => user.name).join(", ") + (typingUsers.length > 1 ? " are" : " is") + " typing...");
 		} else {
 			setUsersTypyingHint("");
 		}
-		console.log("typing users", typingUsers, usersTypyingHint);
 	}, [typingUsers]);
 
 	return (
@@ -126,7 +121,7 @@ function RoomChat({ id }: { id: string }) {
 
 			<div className="shrink-0 border-t border-border/60 bg-background px-3 py-2">
 				{usersTypyingHint ? (
-					<div className="flex flex-col gap-1">
+					<div className="flex flex-col gap-1 pb-2">
 						<p className="text-sm text-muted-foreground animate-pulse italic">{usersTypyingHint}</p>
 					</div>
 				) : (

@@ -25,7 +25,7 @@ export default function StrangerMsg({
 			)}
 			<div className="flex flex-col max-w-[80%] min-w-[4rem]">
 				{showName && (
-					<span className="text-xs font-semibold text-sky-600 dark:text-sky-400 mb-0.5 ml-1">{name}</span>
+					<span className="text-xs font-semibold text-sky-600 dark:text-sky-400 mb-0.5 ml-1 truncate">{name}</span>
 				)}
 				<div className="relative">
 					<div className="bubble-in px-3 py-1.5 pb-5 rounded-2xl rounded-bl-sm text-sm leading-relaxed break-words">
