@@ -1,15 +1,18 @@
 "use client";
 
+import ServerWakeDialog from "@/components/ServerWakeDialog";
+import { useRoomNavigation } from "@/hooks/use-room-navigation";
 import { randomKey } from "@/lib/utils";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 export default function NewRoom() {
-	const router = useRouter();
+	const { goToRoom, waking, failed, retry } = useRoomNavigation();
 
 	return (
-		<button
-			onClick={() => router.push(`/room/${randomKey()}`)}
+		<>
+			<ServerWakeDialog open={waking || failed} failed={failed} onRetry={retry} />
+			<button
+				onClick={() => goToRoom(randomKey())}
 			className="group relative w-full p-6 rounded-2xl glass hover:glass-strong transition-all duration-300 text-left hover:glow-violet">
 			<div className="flex items-start gap-4">
 				<div className="size-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -23,5 +26,6 @@ export default function NewRoom() {
 				</div>
 			</div>
 		</button>
+		</>
 	);
 }

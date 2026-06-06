@@ -1,14 +1,15 @@
 "use client";
 
+import ServerWakeDialog from "@/components/ServerWakeDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRoomNavigation } from "@/hooks/use-room-navigation";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Hash } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 function JoinRoom() {
-	const router = useRouter();
+	const { goToRoom, waking, failed, retry } = useRoomNavigation();
 	const [code, setCode] = useState("");
 
 	const extractRoomId = (input: string) => {
@@ -20,11 +21,13 @@ function JoinRoom() {
 	const handleJoin = () => {
 		const roomId = extractRoomId(code);
 		if (!roomId) return;
-		router.push(`/room/${roomId}`);
+		goToRoom(roomId);
 	};
 
 	return (
-		<div className="w-full p-6 rounded-2xl glass">
+		<>
+			<ServerWakeDialog open={waking || failed} failed={failed} onRetry={retry} />
+			<div className="w-full p-6 rounded-2xl glass">
 			<div className="flex items-start gap-4 mb-4">
 				<div className="size-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shrink-0">
 					<Hash className="size-6 text-white" />
@@ -57,6 +60,7 @@ function JoinRoom() {
 				</Button>
 			</div>
 		</div>
+		</>
 	);
 }
 

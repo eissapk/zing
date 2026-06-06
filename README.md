@@ -10,7 +10,6 @@ npm run dev
 ```
 
 ### todolist
-add waiting dialog to until server is up when joining room or creating room
 notification using push notification browser api
 Seen
 

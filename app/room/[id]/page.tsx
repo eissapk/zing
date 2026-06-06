@@ -4,7 +4,9 @@ import ChatForm from "@/components/chat/Form";
 import MessageList from "@/components/chat/MessageList";
 import Nav from "@/components/chat/Nav";
 import UsernameDialog from "@/components/chat/UsernameDialog";
+import ServerWakeDialog from "@/components/ServerWakeDialog";
 import { WallpaperProvider, useWallpaper } from "@/components/WallpaperProvider";
+import { useServerReady } from "@/hooks/use-server-ready";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { playJoinSound, playLeaveSound, playReceiveSound } from "@/lib/sounds";
@@ -24,6 +26,7 @@ export default function Room({ params }: { params: { id: string } }) {
 }
 
 function RoomChat({ id }: { id: string }) {
+	const { ready: serverReady, failed: serverFailed, retry: retryServer } = useServerReady();
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [typingUsers, setTypingUsers] = useState<{ name: string; id: number }[]>([]);
 	const [usersTypyingHint, setUsersTypyingHint] = useState<string>("");
@@ -71,13 +74,13 @@ function RoomChat({ id }: { id: string }) {
 		const onUserConnected = (name: string) => {
 			setMessages(prev => [...prev, { type: "system", msg: `${name} joined`, variant: "join", time: Date.now(), id: msgId() }]);
 			playJoinSound();
-			toast({ title: "Someone joined", description: name });
+			toast({ title: "Someone joined", description: name, variant: "join" });
 		};
 
 		const onUserDisconnected = (name: string) => {
 			setMessages(prev => [...prev, { type: "system", msg: `${name} left`, variant: "leave", time: Date.now(), id: msgId() }]);
 			playLeaveSound();
-			toast({ title: "Someone left", description: name });
+			toast({ title: "Someone left", description: name, variant: "leave" });
 		};
 
 		socket.on("chat-message", onChatMessage);
@@ -103,6 +106,10 @@ function RoomChat({ id }: { id: string }) {
 		}
 	}, [typingUsers]);
 
+	if (!serverReady) {
+		return <ServerWakeDialog open failed={serverFailed} onRetry={retryServer} />;
+	}
+
 	return (
 		<div className="flex flex-col h-screen bg-background">
 			<UsernameDialog open={showNameDialog} onSubmit={joinRoom} />
@@ -120,12 +127,11 @@ function RoomChat({ id }: { id: string }) {
 			</div>
 
 			<div className="shrink-0 border-t border-border/60 bg-background px-3 py-2">
-				{usersTypyingHint ? (
-					<div className="flex flex-col gap-1 pb-2">
-						<p className="text-sm text-muted-foreground animate-pulse italic">{usersTypyingHint}</p>
+				{usersTypyingHint && (
+					<div className="flex items-center gap-2 pb-1">
+						<span className="inline-block w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+						<span className="text-xs font-mono text-muted-foreground">{usersTypyingHint}</span>
 					</div>
-				) : (
-					""
 				)}
 				<ChatForm className="max-w-chat mx-auto" roomName={id} setMessages={setMessages} socket={socket} />
 			</div>

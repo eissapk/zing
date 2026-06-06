@@ -38,6 +38,7 @@ function Nav({ roomId }: { roomId: string }) {
 		toast({
 			title: "Link copied!",
 			description: "Share it with others to invite them.",
+			variant: "default",
 		});
 	};
 
