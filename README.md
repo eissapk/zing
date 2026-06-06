@@ -10,8 +10,8 @@ npm run dev
 ```
 
 ### todolist
-notification using push notification browser api
-Seen
-
 Load chat for new joined users (at least the last 10 messages)
+Seen
 Attachments (image, audio, gif, etc)
+sending voice notes
+sending images from camera

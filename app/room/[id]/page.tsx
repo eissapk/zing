@@ -9,6 +9,7 @@ import { WallpaperProvider, useWallpaper } from "@/components/WallpaperProvider"
 import { useServerReady } from "@/hooks/use-server-ready";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { isTabUnfocused, requestNotificationPermission, showChatNotification } from "@/lib/notifications";
 import { playJoinSound, playLeaveSound, playReceiveSound } from "@/lib/sounds";
 import type { Message } from "@/lib/types";
 import { fetcher, msgId } from "@/lib/utils";
@@ -48,6 +49,7 @@ function RoomChat({ id }: { id: string }) {
 			setShowNameDialog(false);
 			setJoined(true);
 			setMessages([{ type: "system", msg: "You joined the room", variant: "info", time: Date.now(), id: msgId() }]);
+			void requestNotificationPermission();
 			socket.emit("new-user", id, name);
 		},
 		[id]
@@ -58,7 +60,11 @@ function RoomChat({ id }: { id: string }) {
 
 		const onChatMessage = (data: { name: string; message: string }) => {
 			setMessages(prev => [...prev, { type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() }]);
-			playReceiveSound();
+			if (isTabUnfocused()) {
+				showChatNotification(data.name, data.message, id);
+			} else {
+				playReceiveSound();
+			}
 		};
 		const onChatTyping = (data: { name: string; id: number }) => {
 			setTypingUsers(prev => {
@@ -96,7 +102,7 @@ function RoomChat({ id }: { id: string }) {
 			socket.off("user-connected", onUserConnected);
 			socket.off("user-disconnected", onUserDisconnected);
 		};
-	}, [joined, toast]);
+	}, [joined, toast, id]);
 
 	useEffect(() => {
 		if (typingUsers.length) {
