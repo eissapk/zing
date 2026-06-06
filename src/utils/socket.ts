@@ -12,26 +12,30 @@ export const socket = socket => {
 		console.log(`User: ${name}(${socket.id}) -- Joined room: ${room}`);
 
 		rooms[room].users[socket.id] = name;
-		socket.broadcast.to(room).emit("user-connected", name);
+		const messages = rooms[room].messages;
+		socket.broadcast.to(room).emit("user-connected", {name, messages});
 	});
 
 	socket.on("send-chat-message", (room, message) => {
 		const name = rooms[room].users[socket.id];
+		if (!rooms[room]?.messages) rooms[room].messages = []; // initial messages array
+		rooms[room].messages.push({ message, name, id: socket.id, time: new Date().getTime() }); // push every new message
+		rooms[room].messages = rooms[room].messages.slice(-10); // keep last 10 messages
 		console.log(`User: ${name}(${socket.id}) -- Sent "${message}" -- To room: ${room}`);
 		socket.broadcast.to(room).emit("chat-message", { message, name });
 	});
 
-	socket.on("user-typing", (room) => {
+	socket.on("user-typing", room => {
 		const name = rooms[room].users[socket.id];
 		console.log(`User: ${name}(${socket.id}) -- is typing -- To room: ${room}`);
-		socket.broadcast.to(room).emit("chat-typing", {name, id: socket.id});
+		socket.broadcast.to(room).emit("chat-typing", { name, id: socket.id });
 	});
 
 	socket.on("user-stopped-typing", room => {
 		const name = rooms[room].users[socket.id];
 		console.log(`User: ${name}(${socket.id}) -- stopped typing -- To room: ${room}`);
-		socket.broadcast.to(room).emit("chat-stopped-typing", {name, id: socket.id});
-	})
+		socket.broadcast.to(room).emit("chat-stopped-typing", { name, id: socket.id });
+	});
 
 	socket.on("disconnect", () => {
 		getUserRooms(socket).forEach(room => {
@@ -41,6 +45,12 @@ export const socket = socket => {
 			console.log(`User: ${rooms[room].users[socket.id]} -- Left room: ${room}`);
 			// @ts-expect-error -- tandle it later
 			delete rooms[room].users[socket.id];
+
+			// todo: 
+			// if (!rooms[room]?.users?.length) {
+				// await deleteAttachments(rooms[room])
+				// delete rooms[room]; // delete room with users/message to free memeory/disk
+			// }
 		});
 	});
 };
