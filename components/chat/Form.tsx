@@ -7,7 +7,7 @@ import { playSendSound } from "@/lib/sounds";
 import type { Message } from "@/lib/types";
 import { cn, msgId } from "@/lib/utils";
 import { SendHorizontal, Smile } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
 
 export default function ChatForm({
@@ -25,11 +25,59 @@ export default function ChatForm({
 	const [emojiOpen, setEmojiOpen] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const emojiButtonRef = useRef<HTMLButtonElement>(null);
+	const lastTypingEmitRef = useRef(0);
+	const stopTypingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+	const isTypingRef = useRef(false);
+
+	const TYPING_THROTTLE_MS = 2000;
+	const STOP_TYPING_DELAY_MS = 2000;
+
+	const notifyStoppedTyping = () => {
+		if (!isTypingRef.current) return;
+		isTypingRef.current = false;
+		socket.emit("user-stopped-typing", roomName);
+	};
+
+	const scheduleStopTyping = () => {
+		clearTimeout(stopTypingTimeoutRef.current);
+		stopTypingTimeoutRef.current = setTimeout(notifyStoppedTyping, STOP_TYPING_DELAY_MS);
+	};
+
+	const handleTypingActivity = (value: string) => {
+		if (!value) {
+			clearTimeout(stopTypingTimeoutRef.current);
+			notifyStoppedTyping();
+			return;
+		}
+
+		const now = Date.now();
+		if (!isTypingRef.current || now - lastTypingEmitRef.current >= TYPING_THROTTLE_MS) {
+			lastTypingEmitRef.current = now;
+			isTypingRef.current = true;
+			socket.emit("user-typing", roomName);
+		}
+
+		scheduleStopTyping();
+	};
+
+	useEffect(() => {
+		return () => {
+			clearTimeout(stopTypingTimeoutRef.current);
+			if (isTypingRef.current) {
+				isTypingRef.current = false;
+				socket.emit("user-stopped-typing", roomName);
+			}
+		};
+	}, [roomName, socket]);
 
 	const insertEmoji = (emoji: string) => {
 		const el = inputRef.current;
 		if (!el) {
-			setInput((prev) => prev + emoji);
+			setInput((prev) => {
+				const next = prev + emoji;
+				handleTypingActivity(next);
+				return next;
+			});
 			return;
 		}
 
@@ -37,6 +85,7 @@ export default function ChatForm({
 		const end = el.selectionEnd ?? input.length;
 		const next = input.slice(0, start) + emoji + input.slice(end);
 		setInput(next);
+		handleTypingActivity(next);
 
 		requestAnimationFrame(() => {
 			el.focus();
@@ -53,8 +102,16 @@ export default function ChatForm({
 		setMessages((prev) => [...prev, obj]);
 		socket.emit("send-chat-message", roomName, input);
 		playSendSound();
+		clearTimeout(stopTypingTimeoutRef.current);
+		notifyStoppedTyping();
 		setInput("");
 		setEmojiOpen(false);
+	};
+
+	const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setInput(value);
+		handleTypingActivity(value);
 	};
 
 	return (
@@ -87,7 +144,7 @@ export default function ChatForm({
 					placeholder="Message"
 					className="h-10 flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm rounded-full"
 					value={input}
-					onChange={(e) => setInput(e.target.value)}
+					onChange={inputChangeHandler}
 				/>
 
 				<Button

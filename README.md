@@ -10,8 +10,9 @@ npm run dev
 ```
 
 ### todolist
+add waiting dialog to until server is up when joining room or creating room
 notification using push notification browser api
-Writing..
 Seen
+
+Load chat for new joined users (at least the last 10 messages)
 Attachments (image, audio, gif, etc)
-Load chat for new users (at least the last 10 messages)

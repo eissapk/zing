@@ -25,6 +25,8 @@ export default function Room({ params }: { params: { id: string } }) {
 
 function RoomChat({ id }: { id: string }) {
 	const [messages, setMessages] = useState<Message[]>([]);
+	const [typingUsers, setTypingUsers] = useState<string[]>([]);
+	const [usersTypyingHint, setUsersTypyingHint] = useState<string>("");
 	const [showNameDialog, setShowNameDialog] = useState(true);
 	const [joined, setJoined] = useState(false);
 	const { toast } = useToast();
@@ -52,41 +54,59 @@ function RoomChat({ id }: { id: string }) {
 		if (!joined) return;
 
 		const onChatMessage = (data: { name: string; message: string }) => {
-			setMessages((prev) => [
-				...prev,
-				{ type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() },
-			]);
+			setMessages(prev => [...prev, { type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() }]);
 			playReceiveSound();
+		};
+		const onChatTyping = (name: string) => {
+			if (typingUsers.includes(name)) return;
+			setTypingUsers(prev => [...prev, name]);
+		};
+		const onChatStoppedTyping = (name: string) => {
+			// remove first match of name in case of having same name multiple times
+			if (typingUsers.length) {
+				setTypingUsers(prev => {
+					return prev.filter(user => user !== name);
+				});
+			} else {
+				setTypingUsers([]);
+			}
 		};
 
 		const onUserConnected = (name: string) => {
-			setMessages((prev) => [
-				...prev,
-				{ type: "system", msg: `${name} joined`, variant: "join", time: Date.now(), id: msgId() },
-			]);
+			setMessages(prev => [...prev, { type: "system", msg: `${name} joined`, variant: "join", time: Date.now(), id: msgId() }]);
 			playJoinSound();
 			toast({ title: "Someone joined", description: name });
 		};
 
 		const onUserDisconnected = (name: string) => {
-			setMessages((prev) => [
-				...prev,
-				{ type: "system", msg: `${name} left`, variant: "leave", time: Date.now(), id: msgId() },
-			]);
+			setMessages(prev => [...prev, { type: "system", msg: `${name} left`, variant: "leave", time: Date.now(), id: msgId() }]);
 			playLeaveSound();
 			toast({ title: "Someone left", description: name });
 		};
 
 		socket.on("chat-message", onChatMessage);
+		socket.on("chat-typing", onChatTyping);
+		socket.on("chat-stopped-typing", onChatStoppedTyping);
 		socket.on("user-connected", onUserConnected);
 		socket.on("user-disconnected", onUserDisconnected);
 
 		return () => {
 			socket.off("chat-message", onChatMessage);
+			socket.off("chat-typing", onChatTyping);
+			socket.off("chat-stopped-typing", onChatStoppedTyping);
 			socket.off("user-connected", onUserConnected);
 			socket.off("user-disconnected", onUserDisconnected);
 		};
 	}, [joined, toast]);
+
+	useEffect(() => {
+		if (typingUsers.length) {
+			setUsersTypyingHint(typingUsers.join(", ") + (typingUsers.length > 1 ? " are" : " is") + " typing...");
+		} else {
+			setUsersTypyingHint("");
+		}
+		console.log("typing users", typingUsers, usersTypyingHint);
+	}, [typingUsers]);
 
 	return (
 		<div className="flex flex-col h-screen bg-background">
@@ -105,6 +125,13 @@ function RoomChat({ id }: { id: string }) {
 			</div>
 
 			<div className="shrink-0 border-t border-border/60 bg-background px-3 py-2">
+				{usersTypyingHint ? (
+					<div className="flex flex-col gap-1">
+						<p className="text-sm text-muted-foreground animate-pulse italic">{usersTypyingHint}</p>
+					</div>
+				) : (
+					""
+				)}
 				<ChatForm className="max-w-chat mx-auto" roomName={id} setMessages={setMessages} socket={socket} />
 			</div>
 		</div>
