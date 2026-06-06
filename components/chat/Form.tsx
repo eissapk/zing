@@ -123,7 +123,7 @@ export default function ChatForm({
 				anchorRef={emojiButtonRef}
 			/>
 
-			<div className="flex items-center gap-1.5 p-1.5 rounded-full bg-muted/80 dark:bg-secondary/80 border border-border/50">
+			<div className="flex items-center gap-1.5 p-1.5 rounded-full bg-white dark:bg-[#212121] border border-black/10 dark:border-white/10 shadow-sm">
 				<Button
 					ref={emojiButtonRef}
 					type="button"
@@ -131,8 +131,8 @@ export default function ChatForm({
 					variant="ghost"
 					onClick={() => setEmojiOpen((prev) => !prev)}
 					className={cn(
-						"size-10 rounded-full shrink-0 hover:bg-foreground/5",
-						emojiOpen && "bg-background text-sky-600 dark:text-sky-400"
+						"size-10 rounded-full shrink-0 text-zinc-500 hover:text-zinc-700 hover:bg-black/5 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-white/10",
+						emojiOpen && "bg-zinc-100 text-sky-600 dark:bg-white/10 dark:text-sky-400"
 					)}
 					aria-label="Toggle emoji picker">
 					<Smile className="size-5 pointer-events-none" />

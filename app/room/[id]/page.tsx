@@ -59,6 +59,8 @@ function RoomChat({ id }: { id: string }) {
 		if (!joined) return;
 
 		const onChatMessage = (data: { name: string; message: string }) => {
+			console.log("onChatMessage", data.messages);
+			
 			setMessages(prev => [...prev, { type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() }]);
 			if (isTabUnfocused()) {
 				showChatNotification(data.name, data.message, id);
@@ -121,25 +123,28 @@ function RoomChat({ id }: { id: string }) {
 			<UsernameDialog open={showNameDialog} onSubmit={joinRoom} />
 			<Nav roomId={id} />
 
-			<div ref={scrollRef} className={cn("flex-1 overflow-y-auto chat-area", `chat-wp-${wallpaper}`)}>
-				<div className="max-w-chat mx-auto px-3 py-4">
-					{messages.length === 0 && joined && (
-						<div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center">
-							<p className="text-muted-foreground text-sm">No messages yet. Say hello!</p>
+			<div className={cn("relative flex flex-col flex-1 min-h-0", `chat-wp-${wallpaper}`)}>
+				{wallpaper === "default" && <div className="chat-bg-pattern" aria-hidden />}
+				<div ref={scrollRef} className="relative flex-1 overflow-y-auto chat-area z-10">
+					<div className="max-w-chat mx-auto px-3 py-4">
+						{messages.length === 0 && joined && (
+							<div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center">
+								<p className="text-muted-foreground text-sm">No messages yet. Say hello!</p>
+							</div>
+						)}
+						<MessageList messages={messages} />
+					</div>
+				</div>
+
+				<div className="relative z-10 shrink-0 px-3 py-2">
+					{usersTypyingHint && (
+						<div className="flex items-center gap-2 pb-1">
+							<span className="inline-block w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+							<span className="text-xs font-mono text-muted-foreground">{usersTypyingHint}</span>
 						</div>
 					)}
-					<MessageList messages={messages} />
+					<ChatForm className="max-w-chat mx-auto" roomName={id} setMessages={setMessages} socket={socket} />
 				</div>
-			</div>
-
-			<div className="shrink-0 border-t border-border/60 bg-background px-3 py-2">
-				{usersTypyingHint && (
-					<div className="flex items-center gap-2 pb-1">
-						<span className="inline-block w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
-						<span className="text-xs font-mono text-muted-foreground">{usersTypyingHint}</span>
-					</div>
-				)}
-				<ChatForm className="max-w-chat mx-auto" roomName={id} setMessages={setMessages} socket={socket} />
 			</div>
 		</div>
 	);
