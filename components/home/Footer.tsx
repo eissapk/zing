@@ -7,7 +7,8 @@ export default function Footer() {
 			<div className="mx-auto flex max-w-md flex-col items-center gap-3 text-center">
 				<nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
 					{SITE.links.map((link) =>
-						link.external ? (
+						// @ts-expect-error external is not always present
+						link?.external ? (
 							<a
 								key={link.href}
 								href={link.href}
