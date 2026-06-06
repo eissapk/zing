@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Zing">
+  <defs>
+    <linearGradient id="zing-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8b5cf6" />
+      <stop stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#zing-gradient)" />
+  <g transform="translate(4 4)">
+    <path
+      d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round" />
+  </g>
+</svg>

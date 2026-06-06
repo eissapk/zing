@@ -9,6 +9,7 @@ import { WallpaperProvider, useWallpaper } from "@/components/WallpaperProvider"
 import { useServerReady } from "@/hooks/use-server-ready";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { initFaviconBadgeReset, setFaviconBadged } from "@/lib/favicon";
 import { isTabUnfocused, requestNotificationPermission, showChatNotification } from "@/lib/notifications";
 import { playJoinSound, playLeaveSound, playReceiveSound } from "@/lib/sounds";
 import type { Message } from "@/lib/types";
@@ -32,6 +33,7 @@ function RoomChat({ id }: { id: string }) {
 	const [typingUsers, setTypingUsers] = useState<{ name: string; id: number }[]>([]);
 	const [usersTypyingHint, setUsersTypyingHint] = useState<string>("");
 	const [showNameDialog, setShowNameDialog] = useState(true);
+	const [userName, setUserName] = useState("");
 	const [joined, setJoined] = useState(false);
 	const { toast } = useToast();
 	const { wallpaper } = useWallpaper();
@@ -46,6 +48,7 @@ function RoomChat({ id }: { id: string }) {
 	const joinRoom = useCallback(
 		async (name: string) => {
 			await createRoom(id);
+			setUserName(name);
 			setShowNameDialog(false);
 			setJoined(true);
 			setMessages([{ type: "system", msg: "You joined the room", variant: "info", time: Date.now(), id: msgId() }]);
@@ -58,9 +61,12 @@ function RoomChat({ id }: { id: string }) {
 	useEffect(() => {
 		if (!joined) return;
 
+		const cleanupFavicon = initFaviconBadgeReset();
+
 		const onChatMessage = (data: { name: string; message: string }) => {
 			setMessages(prev => [...prev, { type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() }]);
 			if (isTabUnfocused()) {
+				setFaviconBadged();
 				showChatNotification(data.name, data.message, id);
 			} else {
 				playReceiveSound();
@@ -77,11 +83,10 @@ function RoomChat({ id }: { id: string }) {
 			setTypingUsers(prev => prev.filter(user => user.id !== data.id));
 		};
 
-		const onUserConnected = (data: { name: string; messages: any[] }) => {
-			console.log("onUserConnected show last 10 messages", data.messages);
-			setMessages(prev => [...prev, { type: "system", msg: `${data.name} joined`, variant: "join", time: Date.now(), id: msgId() }]);
+		const onUserConnected = (name: string) => {
+			setMessages(prev => [...prev, { type: "system", msg: `${name} joined`, variant: "join", time: Date.now(), id: msgId() }]);
 			playJoinSound();
-			toast({ title: "Someone joined", description: data.name, variant: "join" });
+			toast({ title: "Someone joined", description: name, variant: "join" });
 		};
 
 		const onUserDisconnected = (name: string) => {
@@ -90,18 +95,26 @@ function RoomChat({ id }: { id: string }) {
 			toast({ title: "Someone left", description: name, variant: "leave" });
 		};
 
+		const onPrevMessages = (messages: Message[]) => {
+			// console.log("onPrevMessages", messages);
+			setMessages(prev => [...messages, ...prev]);
+		};
+
 		socket.on("chat-message", onChatMessage);
 		socket.on("chat-typing", onChatTyping);
 		socket.on("chat-stopped-typing", onChatStoppedTyping);
 		socket.on("user-connected", onUserConnected);
 		socket.on("user-disconnected", onUserDisconnected);
+		socket.on("prev-messages", onPrevMessages);
 
 		return () => {
+			cleanupFavicon?.();
 			socket.off("chat-message", onChatMessage);
 			socket.off("chat-typing", onChatTyping);
 			socket.off("chat-stopped-typing", onChatStoppedTyping);
 			socket.off("user-connected", onUserConnected);
 			socket.off("user-disconnected", onUserDisconnected);
+			socket.off("prev-messages", onPrevMessages);
 		};
 	}, [joined, toast, id]);
 
@@ -120,7 +133,7 @@ function RoomChat({ id }: { id: string }) {
 	return (
 		<div className="flex flex-col h-screen bg-background">
 			<UsernameDialog open={showNameDialog} onSubmit={joinRoom} />
-			<Nav roomId={id} />
+			<Nav roomId={id} userName={userName} />
 
 			<div className={cn("relative flex flex-col flex-1 min-h-0", `chat-wp-${wallpaper}`)}>
 				{wallpaper === "default" && <div className="chat-bg-pattern" aria-hidden />}

@@ -4,9 +4,8 @@ import People from "@/components/People";
 import WallpaperPicker from "@/components/chat/WallpaperPicker";
 import ThemeToggle from "@/components/ThemeToggle";
 import ToolTip from "@/components/ToolTip";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Hash, MessageCircle } from "lucide-react";
+import { Hash, MessageCircle, User } from "lucide-react";
 import Link from "next/link";
 
 function copyToClipboard(text: string) {
@@ -29,7 +28,7 @@ function copyToClipboard(text: string) {
 	}
 }
 
-function Nav({ roomId }: { roomId: string }) {
+function Nav({ roomId, userName }: { roomId: string; userName: string }) {
 	const { toast } = useToast();
 
 	const copyUrl = () => {
@@ -51,12 +50,28 @@ function Nav({ roomId }: { roomId: string }) {
 						className="size-9 rounded-full bg-sky-500 flex items-center justify-center shrink-0 hover:bg-sky-600 transition-colors">
 						<MessageCircle className="size-4 text-white" />
 					</Link>
-					<div className="min-w-0">
+					<div className="min-w-0 flex-1">
 						<p className="text-sm font-semibold truncate">Room chat</p>
-						<p className="text-xs font-mono text-muted-foreground truncate flex items-center gap-1">
-							<Hash className="size-3 shrink-0" />
-							{roomId}
-						</p>
+						<div className="text-xs text-muted-foreground flex items-center gap-1.5 min-w-0">
+							<ToolTip title="Copy invite link">
+								<button
+									type="button"
+									onClick={copyUrl}
+									className="font-mono inline-flex items-center gap-1 min-w-0 truncate rounded-sm hover:text-foreground transition-colors">
+									<Hash className="size-3 shrink-0" />
+									<span className="truncate">{roomId}</span>
+								</button>
+							</ToolTip>
+							{userName ? (
+								<>
+									<span className="shrink-0 text-border">·</span>
+									<span className="inline-flex items-center gap-1 shrink-0 font-medium text-foreground">
+										<User className="size-3 shrink-0" />
+										{userName}
+									</span>
+								</>
+							) : null}
+						</div>
 					</div>
 				</div>
 
@@ -66,13 +81,6 @@ function Nav({ roomId }: { roomId: string }) {
 					</li>
 					<li>
 						<ThemeToggle />
-					</li>
-					<li>
-						<ToolTip title="Copy invite link">
-							<Button size="icon" variant="ghost" className="size-9 rounded-full hover:bg-muted" onClick={copyUrl}>
-								<Copy className="size-4" />
-							</Button>
-						</ToolTip>
 					</li>
 					<li>
 						<People roomId={roomId} />

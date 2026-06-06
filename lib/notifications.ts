@@ -1,3 +1,5 @@
+import { resetFavicon } from "@/lib/favicon";
+
 export function isNotificationSupported(): boolean {
 	return typeof window !== "undefined" && "Notification" in window;
 }
@@ -29,6 +31,7 @@ export function showChatNotification(name: string, message: string, roomId: stri
 
 	notification.onclick = () => {
 		window.focus();
+		resetFavicon();
 		notification.close();
 	};
 }
