@@ -21,6 +21,18 @@ export const socket = socket => {
 		socket.broadcast.to(room).emit("chat-message", { message, name });
 	});
 
+	socket.on("user-typing", (room) => {
+		const name = rooms[room].users[socket.id];
+		console.log(`User: ${name}(${socket.id}) -- is typing -- To room: ${room}`);
+		socket.broadcast.to(room).emit("chat-typing", {name, id: socket.id});
+	});
+
+	socket.on("user-stopped-typing", room => {
+		const name = rooms[room].users[socket.id];
+		console.log(`User: ${name}(${socket.id}) -- stopped typing -- To room: ${room}`);
+		socket.broadcast.to(room).emit("chat-stopped-typing", {name, id: socket.id});
+	})
+
 	socket.on("disconnect", () => {
 		getUserRooms(socket).forEach(room => {
 			// @ts-expect-error -- tandle it later
