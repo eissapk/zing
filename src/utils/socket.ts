@@ -6,22 +6,6 @@ import { getUserRooms } from ".";
 export const socket = socket => {
 	// runs when a new user connects
 	console.log("User:", socket.id, "Connected");
-	// let currentRoom = null;
-	// getUserRooms(socket).find(room => {
-	// 	// @ts-expect-error -- todo
-	// 	const users = rooms[room]?.users;
-	// 	if (users) {
-	// 		for (const user of users) {
-	// 			if (user == socket.id) currentRoom = room;
-	// 		}
-	// 	}
-	// });
-
-	// if (currentRoom) {
-	// 	// @ts-expect-error -- todo
-	// 	const messages = rooms[currentRoom]?.messages || [];
-	// 	socket.to(socket.id).emit("prev-messages", messages);
-	// }
 
 	socket.on("new-user", (room, name) => {
 		socket.join(room);
@@ -29,12 +13,16 @@ export const socket = socket => {
 
 		rooms[room].users[socket.id] = name;
 		socket.broadcast.to(room).emit("user-connected", name);
+
+		// send last 10 messages to the joining user only
+		const messages = rooms[room]?.messages || [];
+		socket.emit("prev-messages", messages);
 	});
 
 	socket.on("send-chat-message", (room, message) => {
 		const name = rooms[room].users[socket.id];
 		if (!rooms[room]?.messages) rooms[room].messages = []; // initial messages array
-		rooms[room].messages.push({ message, name, id: socket.id, time: new Date().getTime() }); // push every new message
+		rooms[room].messages.push({ type: "stranger", msg: message, name, id: socket.id, time: new Date().getTime() }); // push every new message
 		rooms[room].messages = rooms[room].messages.slice(-10); // keep last 10 messages
 		console.log(`User: ${name}(${socket.id}) -- Sent "${message}" -- To room: ${room}`);
 		socket.broadcast.to(room).emit("chat-message", { message, name });
