@@ -59,8 +59,6 @@ function RoomChat({ id }: { id: string }) {
 		if (!joined) return;
 
 		const onChatMessage = (data: { name: string; message: string }) => {
-			console.log("onChatMessage", data.messages);
-			
 			setMessages(prev => [...prev, { type: "stranger", name: data.name, msg: data.message, time: Date.now(), id: msgId() }]);
 			if (isTabUnfocused()) {
 				showChatNotification(data.name, data.message, id);
@@ -79,10 +77,11 @@ function RoomChat({ id }: { id: string }) {
 			setTypingUsers(prev => prev.filter(user => user.id !== data.id));
 		};
 
-		const onUserConnected = (name: string) => {
-			setMessages(prev => [...prev, { type: "system", msg: `${name} joined`, variant: "join", time: Date.now(), id: msgId() }]);
+		const onUserConnected = (data: { name: string; messages: any[] }) => {
+			console.log("onUserConnected show last 10 messages", data.messages);
+			setMessages(prev => [...prev, { type: "system", msg: `${data.name} joined`, variant: "join", time: Date.now(), id: msgId() }]);
 			playJoinSound();
-			toast({ title: "Someone joined", description: name, variant: "join" });
+			toast({ title: "Someone joined", description: data.name, variant: "join" });
 		};
 
 		const onUserDisconnected = (name: string) => {
