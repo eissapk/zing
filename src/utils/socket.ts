@@ -6,14 +6,29 @@ import { getUserRooms } from ".";
 export const socket = socket => {
 	// runs when a new user connects
 	console.log("User:", socket.id, "Connected");
+	// let currentRoom = null;
+	// getUserRooms(socket).find(room => {
+	// 	// @ts-expect-error -- todo
+	// 	const users = rooms[room]?.users;
+	// 	if (users) {
+	// 		for (const user of users) {
+	// 			if (user == socket.id) currentRoom = room;
+	// 		}
+	// 	}
+	// });
+
+	// if (currentRoom) {
+	// 	// @ts-expect-error -- todo
+	// 	const messages = rooms[currentRoom]?.messages || [];
+	// 	socket.to(socket.id).emit("prev-messages", messages);
+	// }
 
 	socket.on("new-user", (room, name) => {
 		socket.join(room);
 		console.log(`User: ${name}(${socket.id}) -- Joined room: ${room}`);
 
 		rooms[room].users[socket.id] = name;
-		const messages = rooms[room].messages;
-		socket.broadcast.to(room).emit("user-connected", {name, messages});
+		socket.broadcast.to(room).emit("user-connected", name);
 	});
 
 	socket.on("send-chat-message", (room, message) => {
@@ -46,10 +61,10 @@ export const socket = socket => {
 			// @ts-expect-error -- tandle it later
 			delete rooms[room].users[socket.id];
 
-			// todo: 
+			// todo:
 			// if (!rooms[room]?.users?.length) {
-				// await deleteAttachments(rooms[room])
-				// delete rooms[room]; // delete room with users/message to free memeory/disk
+			// await deleteAttachments(rooms[room])
+			// delete rooms[room]; // delete room with users/message to free memeory/disk
 			// }
 		});
 	});
